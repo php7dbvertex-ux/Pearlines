@@ -1,9 +1,16 @@
-import User from "../models/user.model.js";
+import User from "../models/user.model.js"
+import bcrypt from "bcryptjs";
 
 const createUser = async (userData) => {
-  return await User.create(userData);
-};
+  const hashedPassword = await bcrypt.hash(userData.password, 10);
 
+  const user = await User.create({
+    ...userData,
+    password: hashedPassword,
+  });
+
+  return user;
+};
 const getAllUsers = async () => {
   return await User.find().sort({
     createdAt: -1,

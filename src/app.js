@@ -37,6 +37,8 @@ import chatRoutes from "./routes/chat.route.js";
 
 import messageRoutes from "./routes/message.route.js";
 
+import authRoutes from "./routes/auth.routes.js";
+
 import cors from "cors";
 const app = express();
 
@@ -71,6 +73,7 @@ app.use("/api/privacy-policy", privacyPolicyRoutes);
 app.use("/api/custom-notifications", customNotificationRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/chats", chatRoutes);
+app.use("/api/auth", authRoutes);
 
 app.use("/api/messages", messageRoutes);
 app.get("/", (req, res) => {
