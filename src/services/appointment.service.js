@@ -1,17 +1,35 @@
 import Appointment from "../models/appointment.model.js";
 
 const createAppointment = async (appointmentData) => {
-  return await Appointment.create(appointmentData);
+  const existingAppointment =
+    await Appointment.findOne({
+      patientId: appointmentData.patientId,
+      patientName: appointmentData.patientName,
+    });
+
+  const isRevisit = !!existingAppointment;
+
+  return await Appointment.create({
+    ...appointmentData,
+    isRevisit,
+  });
 };
 const getAppointmentById = async (appointmentId) => {
   return await Appointment.findById(appointmentId);
 };
 
+
+
 const getAllAppointments = async () => {
-  return await Appointment.find().sort({
+  return await Appointment.find({
+    isRevisit: false,
+  }).sort({
     createdAt: -1,
   });
 };
+
+
+
 const updateAppointment = async (appointmentId, updateData) => {
   return await Appointment.findByIdAndUpdate(appointmentId, updateData, {
     new: true,
@@ -28,6 +46,14 @@ const createRevisitAppointment = async (revisitData) => {
     ...revisitData,
 
     isRevisit: true,
+  });
+};
+
+const getMyAppointments = async (userId) => {
+  return await Appointment.find({
+    patientId: userId,
+  }).sort({
+    createdAt: -1,
   });
 };
 
@@ -65,6 +91,30 @@ const getTodayAppointments = async () => {
     appointmentDate: 1,
   });
 };
+
+
+const getMyAppointmentById = async (
+  appointmentId,
+  userId
+) => {
+  return await Appointment.findOne({
+    _id: appointmentId,
+    patientId: userId,
+  });
+};
+
+
+const cancelMyAppointment = async (
+  appointmentId,
+  userId
+) => {
+  return await Appointment.findOneAndDelete({
+    _id: appointmentId,
+    patientId: userId,
+    status: "Pending",
+  });
+};
+
 export default {
   createAppointment,
   getAppointmentById,
@@ -75,4 +125,8 @@ export default {
   getAllRevisitAppointments,
   getRevisitAppointments,
   getTodayAppointments,
+  getMyAppointments,
+  getMyAppointmentById,
+  cancelMyAppointment,
+
 };
