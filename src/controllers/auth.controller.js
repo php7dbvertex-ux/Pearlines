@@ -2,25 +2,66 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-
+// Signup
 export const signup = async (req, res) => {
   try {
-    const { email, password, mobileNo, dob, address } = req.body;
+    const {
+      name,
+      email,
+      password,
+      mobileNo,
+      dob,
+      address,
+    } = req.body;
 
-    // 1. check if user exists
-    const existingUser = await User.findOne({ email });
+    // Validation
+    if (
+      !name ||
+      !email ||
+      !password ||
+      !mobileNo ||
+      !dob ||
+      !address
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    // Check existing email
+    const existingUser = await User.findOne({
+      email,
+    });
 
     if (existingUser) {
       return res.status(400).json({
+        success: false,
         message: "User already exists",
       });
     }
 
-    // 2. hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Check existing mobile number
+    const existingMobile = await User.findOne({
+      mobileNo,
+    });
 
-    // 3. create user
+    if (existingMobile) {
+      return res.status(400).json({
+        success: false,
+        message: "Mobile number already registered",
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(
+      password,
+      10
+    );
+
+    // Create user
     const user = await User.create({
+      name,
       email,
       password: hashedPassword,
       mobileNo,
@@ -28,56 +69,91 @@ export const signup = async (req, res) => {
       address,
     });
 
+    // Remove password from response
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
     res.status(201).json({
       success: true,
       message: "User created successfully",
-      user,
+      user: userResponse,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Signup Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-
-
+// Login
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // 1. find user
-    const user = await User.findOne({ email });
+    // Validation
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required",
+      });
+    }
+
+    // Find user
+    const user = await User.findOne({
+      email,
+    });
 
     if (!user) {
       return res.status(404).json({
+        success: false,
         message: "User not found",
       });
     }
 
-    // 2. compare password
-    const isMatch = await bcrypt.compare(password, user.password);
+    // Compare password
+    const isMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
 
     if (!isMatch) {
       return res.status(400).json({
+        success: false,
         message: "Invalid credentials",
       });
     }
 
-    // 3. create token
+    // Generate JWT
     const token = jwt.sign(
       {
         id: user._id,
         email: user.email,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      {
+        expiresIn: "7d",
+      }
     );
 
-    res.json({
+    // Remove password from response
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    res.status(200).json({
       success: true,
+      message: "Login successful",
       token,
-      user,
+      user: userResponse,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Login Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
