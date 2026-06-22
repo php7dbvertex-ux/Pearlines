@@ -58,7 +58,7 @@ app.use(
   }),
 );
 
-app.use(express.json());
+
 app.use("/api/upload", uploadRoutes);
 
 app.use("/api/users", userRoutes);
