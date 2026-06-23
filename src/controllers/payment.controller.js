@@ -26,7 +26,7 @@ export const createOrder = async (
 
     await Payment.create({
       userId: req.user.id,
-      amount,
+      amount : amount*100,
       orderId: order.id,
       status: "pending",
     });

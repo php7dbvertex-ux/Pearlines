@@ -22,7 +22,7 @@ router.put(
 
 router.delete(
     "/my/:id",
-    
+    authMiddleware,
     appointmentController.cancelMyAppointment,
 );
 
