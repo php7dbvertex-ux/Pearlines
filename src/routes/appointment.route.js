@@ -14,9 +14,15 @@ router.get("/revisit", appointmentController.getAllRevisitAppointments);
 
 router.get("/my", authMiddleware, appointmentController.getMyAppointments);
 
+router.put(
+  "/my/:id",
+  authMiddleware,
+  appointmentController.updateMyAppointment
+);
+
 router.delete(
     "/my/:id",
-    authMiddleware,
+    
     appointmentController.cancelMyAppointment,
 );
 
@@ -25,7 +31,7 @@ router.get(
     authMiddleware,
     appointmentController.getMyAppointmentById,
 );
-router.get("/today", appointmentController.getTodayAppointments);
+router.get("/today", authMiddleware,appointmentController.getTodayAppointments);
 
 router.get("/:id", appointmentController.getAppointmentById);
 router.put("/:id", appointmentController.updateAppointment);

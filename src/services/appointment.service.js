@@ -115,6 +115,41 @@ const cancelMyAppointment = async (
   });
 };
 
+
+
+const updateMyAppointment = async (
+  appointmentId,
+  userId,
+  updateData
+) => {
+  const appointment =
+    await Appointment.findOne({
+      _id: appointmentId,
+      patientId: userId,
+    });
+
+  if (!appointment) {
+    throw new Error("Appointment not found");
+  }
+
+  if (appointment.status !== "Pending") {
+    throw new Error(
+      "Only pending appointments can be updated"
+    );
+  }
+
+  return await Appointment.findByIdAndUpdate(
+    appointmentId,
+    updateData,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+};
+
+
+
 export default {
   createAppointment,
   getAppointmentById,
@@ -128,5 +163,6 @@ export default {
   getMyAppointments,
   getMyAppointmentById,
   cancelMyAppointment,
+  updateMyAppointment,
 
 };

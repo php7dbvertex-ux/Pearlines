@@ -288,6 +288,35 @@ const cancelMyAppointment = async (
   }
 };
 
+
+
+const updateMyAppointment = async (
+  req,
+  res
+) => {
+  try {
+    const appointment =
+      await appointmentService.updateMyAppointment(
+        req.params.id,
+        req.user.id,
+        req.body
+      );
+
+    res.status(200).json({
+      success: true,
+      message:
+        "Appointment updated successfully",
+      data: appointment,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
 export default {
   createAppointment,
   getAllAppointments,
@@ -300,4 +329,5 @@ export default {
   getMyAppointments,
   getMyAppointmentById,
   cancelMyAppointment,
+  updateMyAppointment,
 };
