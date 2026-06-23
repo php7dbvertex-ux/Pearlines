@@ -23,6 +23,11 @@ const messageSchema =
         type: String,
         required: true,
       },
+
+      seenByAdmin: {
+        type: Boolean,
+        default: false,
+      },
     },
     {
       timestamps: true,

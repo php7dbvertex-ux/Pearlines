@@ -45,7 +45,26 @@ const getMessagesByChatId = async (req, res) => {
   }
 };
 
+const markMessagesAsRead = async (req, res) => {
+  try {
+    const { chatId } = req.params;
+
+    await messageService.markMessagesAsRead(chatId);
+
+    res.status(200).json({
+      success: true,
+      message: "Messages marked as read",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export default {
   createMessage,
   getMessagesByChatId,
+  markMessagesAsRead,
 };

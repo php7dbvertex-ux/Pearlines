@@ -1,62 +1,44 @@
 import Chat from "../models/chat.model.js";
 
-const createChat =
-  async (
-    patientName,
-    mobileNo
-  ) => {
-    const existingChat =
-      await Chat.findOne({
-        mobileNo,
-      });
+import messageService from "./message.service.js";
 
-    if (existingChat) {
-      return existingChat;
-    }
+const createChat = async (patientName, mobileNo) => {
+  let chat = await Chat.findOne({ mobileNo });
 
-    return await Chat.create({
-      patientName,
-      mobileNo,
-    });
-  };
+  if (!chat) {
+    chat = await Chat.create({ patientName, mobileNo });
+  }
 
-const getAllChats =
-  async () => {
-    return await Chat.find().sort({
-      lastMessageAt: -1,
-    });
-  };
+  return chat;
+};
 
-const getChatByMobileNo =
-  async (mobileNo) => {
-    return await Chat.findOne({
-      mobileNo,
-    });
-  };
+const getAllChats = async () => {
+  const chats = await Chat.find().sort({ lastMessageAt: -1 });
 
-const updateLastMessage =
-  async (
-    chatId,
-    message
-  ) => {
-    return await Chat.findByIdAndUpdate(
-      chatId,
-      {
-        lastMessage:
-          message,
+  const unreadCountMap = await messageService.getUnreadCountsByChat();
 
-        lastMessageAt:
-          new Date(),
-      },
-      {
-        new: true,
-      }
-    );
-  };
+  // Attach unreadCount to each chat (plain object, since chats are
+  // mongoose documents and we don't want to mutate/save them).
+  const chatsWithUnread = chats.map((chat) => {
+    const chatObj = chat.toObject();
+
+    chatObj.unreadCount = unreadCountMap[chat._id.toString()] || 0;
+
+    return chatObj;
+  });
+
+  return chatsWithUnread;
+};
+
+const updateLastMessage = async (chatId, message) => {
+  await Chat.findByIdAndUpdate(chatId, {
+    lastMessage: message,
+    lastMessageAt: new Date(),
+  });
+};
 
 export default {
   createChat,
   getAllChats,
-  getChatByMobileNo,
   updateLastMessage,
 };
