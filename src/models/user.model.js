@@ -22,8 +22,15 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+profileImage: {
+  type: String,
+  default: "",
+},
 
-    dob: {
+profileImagePublicId: {
+  type: String,
+  default: "",
+}, dob: {
       type: Date,
       required: true,
     },
