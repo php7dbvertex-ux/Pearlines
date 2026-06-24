@@ -2,16 +2,18 @@ import express from "express";
 
 import doctorController from "../controllers/doctor.controller.js";
 
+import adminAuth from "../middlewares/adminAuth.js";
+
 const router = express.Router();
 
-router.post("/", doctorController.createDoctor);
+router.post("/", adminAuth, doctorController.createDoctor);
 
-router.get("/", doctorController.getAllDoctors);
+router.get("/", adminAuth, doctorController.getAllDoctors);
 
-router.get("/:id", doctorController.getDoctorById);
+router.get("/:id", adminAuth, doctorController.getDoctorById);
 
-router.put("/:id", doctorController.updateDoctor);
+router.put("/:id", adminAuth, doctorController.updateDoctor);
 
-router.delete("/:id", doctorController.deleteDoctor);
+router.delete("/:id", adminAuth, doctorController.deleteDoctor);
 
 export default router;

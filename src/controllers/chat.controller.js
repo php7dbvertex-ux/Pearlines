@@ -1,17 +1,14 @@
 import chatService from "../services/chat.service.js";
 
+
 const createChat =
   async (req, res) => {
     try {
-      const {
-        patientName,
-        mobileNo,
-      } = req.body;
-
       const chat =
         await chatService.createChat(
-          patientName,
-          mobileNo
+          req.user.id,
+          req.user.name,
+          req.user.mobileNo
         );
 
       res.status(201).json({
@@ -21,11 +18,13 @@ const createChat =
     } catch (error) {
       res.status(500).json({
         success: false,
-        message:
-          error.message,
+        message: error.message,
       });
     }
   };
+
+
+
 
 const getAllChats =
   async (req, res) => {
@@ -48,7 +47,28 @@ const getAllChats =
     }
   };
 
+  const getMyChat = async (req, res) => {
+  try {
+    const chat =
+      await Chat.findOne({
+        userId: req.user.id,
+      });
+
+    res.status(200).json({
+      success: true,
+      data: chat,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export default {
   createChat,
   getAllChats,
+  getMyChat,
+  
 };

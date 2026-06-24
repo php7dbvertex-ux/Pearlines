@@ -2,6 +2,9 @@ import express from "express";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import appointmentController from "../controllers/appointment.controller.js";
 
+import adminAuth from "../middlewares/adminAuth.js";
+
+
 const router = express.Router();
 
 router.post("/", authMiddleware, appointmentController.createAppointment);

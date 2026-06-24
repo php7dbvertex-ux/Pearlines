@@ -24,7 +24,14 @@ const messageSchema =
         required: true,
       },
 
+      // For admin panel badge
       seenByAdmin: {
+        type: Boolean,
+        default: false,
+      },
+
+      // For user app badge
+      seenByUser: {
         type: Boolean,
         default: false,
       },

@@ -2,33 +2,35 @@ import CustomNotification from "../models/customNotification.model.js";
 import User from "../models/user.model.js";
 
 const createCustomNotification = async (data) => {
-  const { email, mobileNo, title, message, imageUrl, publicId } = data;
-
-  if (!email && !mobileNo) {
-    throw new Error("Email or Mobile No is required to find the user");
-  }
-
-  const query = [];
-  if (email) query.push({ email: email.toLowerCase().trim() });
-  if (mobileNo) query.push({ mobileNo: mobileNo.trim() });
-
-  const user = await User.findOne({ $or: query });
-
-  if (!user) {
-    throw new Error("User not found with given email/mobile number");
-  }
-
-  const notification = await CustomNotification.create({
-    userId: user._id,
+  const {
+    userId,
     title,
     message,
     imageUrl,
     publicId,
-  });
+  } = data;
+
+  if (!userId) {
+    throw new Error("User is required");
+  }
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const notification =
+    await CustomNotification.create({
+      userId,
+      title,
+      message,
+      imageUrl,
+      publicId,
+    });
 
   return notification;
 };
-
 // Admin: see all notifications sent (to any user)
 const getAllCustomNotifications = async () => {
   return await CustomNotification.find()

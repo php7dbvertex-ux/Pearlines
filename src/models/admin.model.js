@@ -1,32 +1,38 @@
 import mongoose from "mongoose";
 
-const chatSchema = new mongoose.Schema(
+const adminSchema = new mongoose.Schema(
   {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-      unique: true,
-    },
-
-    patientName: {
+    name: {
       type: String,
       required: true,
+      trim: true,
+    },
+
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
     },
 
     mobileNo: {
       type: String,
+      default: "",
+    },
+
+    password: {
+      type: String,
       required: true,
     },
 
-    lastMessage: {
+    profileImage: {
       type: String,
       default: "",
     },
 
-    lastMessageAt: {
-      type: Date,
-      default: Date.now,
+    profileImagePublicId: {
+      type: String,
+      default: "",
     },
   },
   {
@@ -36,6 +42,6 @@ const chatSchema = new mongoose.Schema(
 );
 
 export default mongoose.model(
-  "Chat",
-  chatSchema
+  "Admin",
+  adminSchema
 );

@@ -2,6 +2,8 @@ import express from "express";
 
 import serviceController from "../controllers/service.controller.js";
 
+import adminAuth from "../middlewares/adminAuth.js";
+
 const router =
   express.Router();
 
@@ -9,6 +11,7 @@ const router =
 
 router.post(
   "/",
+  adminAuth,
   serviceController.createService
 );
 
@@ -30,6 +33,7 @@ router.get(
 
 router.put(
   "/:id",
+  adminAuth,
   serviceController.updateService
 );
 
@@ -37,6 +41,7 @@ router.put(
 
 router.delete(
   "/:id",
+  adminAuth,
   serviceController.deleteService
 );
 

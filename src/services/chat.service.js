@@ -1,17 +1,27 @@
 import Chat from "../models/chat.model.js";
 
 import messageService from "./message.service.js";
-
-const createChat = async (patientName, mobileNo) => {
-  let chat = await Chat.findOne({ mobileNo });
+const createChat = async (
+  userId,
+  patientName,
+  mobileNo
+) => {
+  let chat =
+    await Chat.findOne({
+      userId,
+    });
 
   if (!chat) {
-    chat = await Chat.create({ patientName, mobileNo });
+    chat =
+      await Chat.create({
+        userId,
+        patientName,
+        mobileNo,
+      });
   }
 
   return chat;
 };
-
 const getAllChats = async () => {
   const chats = await Chat.find().sort({ lastMessageAt: -1 });
 

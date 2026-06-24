@@ -27,6 +27,10 @@ const customNotificationSchema =
         type: String,
         default: "",
       },
+      isRead: {
+  type: Boolean,
+  default: false,
+},
 
       publicId: {
         type: String,

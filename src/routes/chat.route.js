@@ -8,4 +8,6 @@ router.post("/", chatController.createChat);
 
 router.get("/", chatController.getAllChats);
 
+
+
 export default router;

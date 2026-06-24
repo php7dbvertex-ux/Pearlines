@@ -6,6 +6,7 @@ import {
   getAllPayments,
   getMyPayments,
 } from "../controllers/payment.controller.js";
+import adminAuth from "../middlewares/adminAuth.js";
 
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 
@@ -31,7 +32,7 @@ router.get(
 
 router.get(
   "/all",
- 
+  adminAuth,
   getAllPayments
 );
 

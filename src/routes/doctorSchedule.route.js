@@ -1,17 +1,18 @@
 import express from "express";
 
 import doctorScheduleController from "../controllers/doctorSchedule.controller.js";
+import adminAuth from "../middlewares/adminAuth.js";
 
 const router = express.Router();
 
-router.post("/", doctorScheduleController.createSchedule);
+router.post("/", adminAuth, doctorScheduleController.createSchedule);
 
-router.get("/", doctorScheduleController.getAllSchedules);
+router.get("/", adminAuth, doctorScheduleController.getAllSchedules);
 
-router.get("/:id", doctorScheduleController.getScheduleById);
+router.get("/:id", adminAuth, doctorScheduleController.getScheduleById);
 
-router.put("/:id", doctorScheduleController.updateSchedule);
+router.put("/:id", adminAuth, doctorScheduleController.updateSchedule);
 
-router.delete("/:id", doctorScheduleController.deleteSchedule);
+router.delete("/:id", adminAuth, doctorScheduleController.deleteSchedule);
 
 export default router;

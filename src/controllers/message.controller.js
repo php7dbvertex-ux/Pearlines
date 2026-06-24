@@ -63,8 +63,52 @@ const markMessagesAsRead = async (req, res) => {
   }
 };
 
+const markMessagesAsReadByUser =
+  async (req, res) => {
+    try {
+      await messageService.markMessagesAsReadByUser(
+        req.params.chatId
+      );
+
+      res.status(200).json({
+        success: true,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
+
+
+  const getUserUnreadCount =
+  async (req, res) => {
+    try {
+      const count =
+        await messageService.getUserUnreadCount(
+          req.params.chatId
+        );
+
+      res.status(200).json({
+        success: true,
+        unreadCount: count,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  };
+
+
+
+
 export default {
   createMessage,
   getMessagesByChatId,
   markMessagesAsRead,
+  markMessagesAsReadByUser,
+  getUserUnreadCount,
 };

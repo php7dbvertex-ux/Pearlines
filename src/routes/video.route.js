@@ -2,6 +2,9 @@ import express from "express";
 
 import videoController from "../controllers/video.controller.js";
 
+import adminAuth from "../middlewares/adminAuth.js";
+
+
 const router =
   express.Router();
 
@@ -9,6 +12,7 @@ const router =
 
 router.post(
   "/",
+  adminAuth,
   videoController.createVideo
 );
 
@@ -30,6 +34,7 @@ router.get(
 
 router.put(
   "/:id",
+  adminAuth,
   videoController.updateVideo
 );
 
@@ -37,6 +42,7 @@ router.put(
 
 router.delete(
   "/:id",
+  adminAuth,
   videoController.deleteVideo
 );
 

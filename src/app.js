@@ -42,6 +42,8 @@ import authRoutes from "./routes/auth.routes.js";
 
 import adminRoutes from "./routes/adminRoutes.js";
 
+import userNotificationRoutes from "./routes/userNotification.route.js";
+
 
 import cors from "cors";
 const app = express();
@@ -81,7 +83,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
-
+app.use("/api/user-notifications", userNotificationRoutes);
 
 app.use("/api/messages", messageRoutes);
 app.get("/", (req, res) => {

@@ -1,13 +1,17 @@
 import Message from "../models/message.model.js";
 
 const createMessage = async ({ chatId, senderType, message }) => {
-  const newMessage = await Message.create({
+const newMessage =
+  await Message.create({
     chatId,
     senderType,
     message,
-    // Admin messages are inherently "seen" by the admin who sent them.
-    // Only messages from the user start as unseen.
-    seenByAdmin: senderType === "admin",
+
+    seenByAdmin:
+      senderType === "admin",
+
+    seenByUser:
+      senderType === "user",
   });
 
   return newMessage;
@@ -64,9 +68,36 @@ const getUnreadCountsByChat = async () => {
   return countMap;
 };
 
+const markMessagesAsReadByUser =
+  async (chatId) => {
+    return await Message.updateMany(
+      {
+        chatId,
+        senderType: "admin",
+        seenByUser: false,
+      },
+      {
+        $set: {
+          seenByUser: true,
+        },
+      }
+    );
+  };
+
+  const getUserUnreadCount =
+  async (chatId) => {
+    return await Message.countDocuments({
+      chatId,
+      senderType: "admin",
+      seenByUser: false,
+    });
+  };
+
 export default {
   createMessage,
   getMessagesByChatId,
   markMessagesAsRead,
   getUnreadCountsByChat,
+  markMessagesAsReadByUser,
+  getUserUnreadCount,
 };
