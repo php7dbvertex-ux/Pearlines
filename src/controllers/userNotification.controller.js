@@ -68,9 +68,10 @@ const getUnreadCount = async (
       await NotificationRead.countDocuments({
         userId,
       });
-
-    const unreadGlobal =
-      totalGlobal - readGlobal;
+const unreadGlobal = Math.max(
+  0,
+  totalGlobal - readGlobal
+);
 
     res.status(200).json({
       success: true,
