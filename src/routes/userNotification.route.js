@@ -35,11 +35,6 @@ router.get(
   userNotificationController.getUnreadCount
 );
 
-router.patch(
-  "/read",
-  authMiddleware,
-  userNotificationController.markAsRead
-);
 
 
 export default router;
