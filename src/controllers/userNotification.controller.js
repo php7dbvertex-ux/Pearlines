@@ -8,13 +8,11 @@ const getUserNotifications = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const globalNotifications =
-      await Notification.find();
+    const globalNotifications = await Notification.find();
 
-    const customNotifications =
-      await CustomNotification.find({
-        userId,
-      });
+    const customNotifications = await CustomNotification.find({
+      userId,
+    });
 
     const notifications = [
       ...globalNotifications.map((n) => ({
@@ -28,11 +26,7 @@ const getUserNotifications = async (req, res) => {
       })),
     ];
 
-    notifications.sort(
-      (a, b) =>
-        new Date(b.createdAt) -
-        new Date(a.createdAt)
-    );
+    notifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     res.status(200).json({
       success: true,
@@ -47,47 +41,42 @@ const getUserNotifications = async (req, res) => {
   }
 };
 
-
 const getUnreadCount = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const unreadCustom =
-      await CustomNotification.countDocuments({
-        userId,
-        isRead: false,
-      });
+    const unreadCustom = await CustomNotification.countDocuments({
+      userId,
+      isRead: false,
+    });
 
-    const totalGlobal =
-      await Notification.countDocuments();
+    const totalGlobal = await Notification.countDocuments();
 
-    const readGlobal =
-      await NotificationRead.countDocuments({
-        userId,
-      });
+    const notifications = await Notification.find({}, "_id");
 
+    const notificationIds = notifications.map((n) => n._id);
+
+    const readGlobal = await NotificationRead.countDocuments({
+      userId,
+      notificationId: {
+        $in: notificationIds,
+      },
+    });
     console.log("========== UNREAD COUNT DEBUG ==========");
     console.log("User ID:", userId);
     console.log("Unread Custom:", unreadCustom);
     console.log("Total Global Notifications:", totalGlobal);
     console.log("Read Global Notifications:", readGlobal);
 
-    const unreadGlobal = Math.max(
-      0,
-      totalGlobal - readGlobal
-    );
+    const unreadGlobal = Math.max(0, totalGlobal - readGlobal);
 
     console.log("Unread Global:", unreadGlobal);
-    console.log(
-      "Final Unread Count:",
-      unreadCustom + unreadGlobal
-    );
+    console.log("Final Unread Count:", unreadCustom + unreadGlobal);
     console.log("========================================");
 
     res.status(200).json({
       success: true,
-      unreadCount:
-        unreadCustom + unreadGlobal,
+      unreadCount: unreadCustom + unreadGlobal,
       debug: {
         unreadCustom,
         totalGlobal,
@@ -96,10 +85,7 @@ const getUnreadCount = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(
-      "Unread Count Error:",
-      error
-    );
+    console.error("Unread Count Error:", error);
 
     res.status(500).json({
       success: false,
@@ -107,10 +93,7 @@ const getUnreadCount = async (req, res) => {
     });
   }
 };
-const markNotificationRead = async (
-  req,
-  res
-) => {
+const markNotificationRead = async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -121,38 +104,34 @@ const markNotificationRead = async (
         $set: {
           isRead: true,
         },
-      }
+      },
     );
 
     // Get all global notifications
-    const notifications =
-      await Notification.find({}, "_id");
+    const notifications = await Notification.find({}, "_id");
 
     // Insert only if not already read
     for (const notification of notifications) {
       await NotificationRead.updateOne(
         {
           userId,
-          notificationId:
-            notification._id,
+          notificationId: notification._id,
         },
         {
           $setOnInsert: {
             userId,
-            notificationId:
-              notification._id,
+            notificationId: notification._id,
           },
         },
         {
           upsert: true,
-        }
+        },
       );
     }
 
     res.status(200).json({
       success: true,
-      message:
-        "All notifications marked as read",
+      message: "All notifications marked as read",
     });
   } catch (error) {
     res.status(500).json({
@@ -162,47 +141,31 @@ const markNotificationRead = async (
   }
 };
 
-  
-const markAsRead = async (
-  req,
-  res
-) => {
+const markAsRead = async (req, res) => {
   try {
-    const {
+    const { notificationId, notificationType } = req.body;
+
+    await userNotificationService.markAsRead({
+      userId: req.user.id,
       notificationId,
       notificationType,
-    } = req.body;
-
-    await userNotificationService.markAsRead(
-      {
-        userId: req.user.id,
-        notificationId,
-        notificationType,
-      }
-    );
+    });
 
     res.status(200).json({
       success: true,
-      message:
-        "Notification marked as read",
+      message: "Notification marked as read",
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      message:
-        error.message,
+      message: error.message,
     });
   }
 };
 
-
-
-
-
 export default {
-
-    getUnreadCount,
-    markNotificationRead,
-      getUserNotifications,
+  getUnreadCount,
+  markNotificationRead,
+  getUserNotifications,
   markAsRead,
 };
