@@ -3,6 +3,7 @@ import chatService from "../services/chat.service.js";
 
 const createChat =
   async (req, res) => {
+    console.log(req.user);
     try {
       const chat =
         await chatService.createChat(

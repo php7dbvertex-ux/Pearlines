@@ -175,7 +175,7 @@ const markAsRead = async (
 
 
 export default {
-  getUserNotifications,
+
     getUnreadCount,
     markNotificationRead,
       getUserNotifications,

@@ -1,6 +1,7 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import Payment from "../models/payment.model.js";
+import PaymentConfig from "../models/paymentConfig.model.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -8,12 +9,18 @@ const razorpay = new Razorpay({
 });
 
 // CREATE ORDER
-export const createOrder = async (
-  req,
-  res
-) => {
+export const createOrder = async (req, res) => {
   try {
-    const { amount } = req.body;
+    const config = await PaymentConfig.findOne();
+
+    if (!config) {
+      return res.status(400).json({
+        success: false,
+        message: "Payment amount not configured",
+      });
+    }
+
+    const amount = config.amount;
 
     const options = {
       amount: amount * 100,
@@ -21,16 +28,16 @@ export const createOrder = async (
       receipt: `receipt_${Date.now()}`,
     };
 
-    const order =
-      await razorpay.orders.create(options);
+    const order = await razorpay.orders.create(options);
 
     await Payment.create({
       userId: req.user.id,
-      amount : amount*100,
+      amount: amount,
+      title: config.title,
+      description: config.description,
       orderId: order.id,
       status: "pending",
     });
-
     return res.status(200).json({
       success: true,
       order,
@@ -45,35 +52,19 @@ export const createOrder = async (
 };
 
 // VERIFY PAYMENT
-export const verifyPayment = async (
-  req,
-  res
-) => {
+export const verifyPayment = async (req, res) => {
   try {
-    const {
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-    } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+      req.body;
 
-    const body =
-      razorpay_order_id +
-      "|" +
-      razorpay_payment_id;
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
 
-    const expectedSignature =
-      crypto
-        .createHmac(
-          "sha256",
-          process.env.RAZORPAY_KEY_SECRET
-        )
-        .update(body.toString())
-        .digest("hex");
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(body.toString())
+      .digest("hex");
 
-    if (
-      expectedSignature !==
-      razorpay_signature
-    ) {
+    if (expectedSignature !== razorpay_signature) {
       return res.status(400).json({
         success: false,
         message: "Payment verification failed",
@@ -88,7 +79,7 @@ export const verifyPayment = async (
         paymentId: razorpay_payment_id,
         signature: razorpay_signature,
         status: "success",
-      }
+      },
     );
 
     return res.status(200).json({
@@ -103,20 +94,13 @@ export const verifyPayment = async (
 };
 
 // ADMIN PAYMENT LIST
-export const getAllPayments = async (
-  req,
-  res
-) => {
+export const getAllPayments = async (req, res) => {
   try {
-    const payments =
-      await Payment.find()
-        .populate(
-          "userId",
-          "name email mobileNo"
-        )
-        .sort({
-          createdAt: -1,
-        });
+    const payments = await Payment.find()
+      .populate("userId", "name email mobileNo")
+      .sort({
+        createdAt: -1,
+      });
 
     return res.status(200).json({
       success: true,
@@ -130,17 +114,13 @@ export const getAllPayments = async (
 };
 
 // USER PAYMENT HISTORY
-export const getMyPayments = async (
-  req,
-  res
-) => {
+export const getMyPayments = async (req, res) => {
   try {
-    const payments =
-      await Payment.find({
-        userId: req.user.id,
-      }).sort({
-        createdAt: -1,
-      });
+    const payments = await Payment.find({
+      userId: req.user.id,
+    }).sort({
+      createdAt: -1,
+    });
 
     return res.status(200).json({
       success: true,

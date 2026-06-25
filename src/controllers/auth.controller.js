@@ -127,18 +127,18 @@ export const login = async (req, res) => {
     }
 
     // Generate JWT
-    const token = jwt.sign(
-      {
-        id: user._id,
-        email: user.email,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
-    );
-
-    // Remove password from response
+const token = jwt.sign(
+  {
+    id: user._id,
+    name: user.name,
+    mobileNo: user.mobileNo,
+    email: user.email,
+  },
+  process.env.JWT_SECRET,
+  {
+    expiresIn: "7d",
+  }
+);    // Remove password from response
     const userResponse = user.toObject();
     delete userResponse.password;
 

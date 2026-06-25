@@ -39,11 +39,11 @@ import messageRoutes from "./routes/message.route.js";
 
 import authRoutes from "./routes/auth.routes.js";
 
-
 import adminRoutes from "./routes/adminRoutes.js";
 
 import userNotificationRoutes from "./routes/userNotification.route.js";
 
+import paymentConfigRoutes from "./routes/paymentConfig.route.js";
 
 import cors from "cors";
 const app = express();
@@ -55,11 +55,10 @@ app.use(
       "http://localhost:5173",
       "https://pearlines-frontend-admin-tdhr.onrender.com",
     ],
-    
+
     credentials: true,
   }),
 );
-
 
 app.use("/api/upload", uploadRoutes);
 
@@ -84,7 +83,7 @@ app.use("/api/chats", chatRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/user-notifications", userNotificationRoutes);
-
+app.use("/api/payment-config", paymentConfigRoutes);
 app.use("/api/messages", messageRoutes);
 app.get("/", (req, res) => {
   res.status(200).json({

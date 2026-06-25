@@ -6,21 +6,28 @@ const createChat = async (
   patientName,
   mobileNo
 ) => {
-  let chat =
-    await Chat.findOne({
-      userId,
-    });
+  console.log({
+    userId,
+    patientName,
+    mobileNo,
+  });
+
+  let chat = await Chat.findOne({
+    userId,
+  });
+
+  console.log("Existing Chat:", chat);
 
   if (!chat) {
-    chat =
-      await Chat.create({
-        userId,
-        patientName,
-        mobileNo,
-      });
+    chat = await Chat.create({
+      userId,
+      patientName,
+      mobileNo,
+    });
   }
 
   return chat;
+
 };
 const getAllChats = async () => {
   const chats = await Chat.find().sort({ lastMessageAt: -1 });
