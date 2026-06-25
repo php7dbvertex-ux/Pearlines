@@ -48,10 +48,7 @@ const getUserNotifications = async (req, res) => {
 };
 
 
-const getUnreadCount = async (
-  req,
-  res
-) => {
+const getUnreadCount = async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -68,17 +65,42 @@ const getUnreadCount = async (
       await NotificationRead.countDocuments({
         userId,
       });
-const unreadGlobal = Math.max(
-  0,
-  totalGlobal - readGlobal
-);
+
+    console.log("========== UNREAD COUNT DEBUG ==========");
+    console.log("User ID:", userId);
+    console.log("Unread Custom:", unreadCustom);
+    console.log("Total Global Notifications:", totalGlobal);
+    console.log("Read Global Notifications:", readGlobal);
+
+    const unreadGlobal = Math.max(
+      0,
+      totalGlobal - readGlobal
+    );
+
+    console.log("Unread Global:", unreadGlobal);
+    console.log(
+      "Final Unread Count:",
+      unreadCustom + unreadGlobal
+    );
+    console.log("========================================");
 
     res.status(200).json({
       success: true,
       unreadCount:
         unreadCustom + unreadGlobal,
+      debug: {
+        unreadCustom,
+        totalGlobal,
+        readGlobal,
+        unreadGlobal,
+      },
     });
   } catch (error) {
+    console.error(
+      "Unread Count Error:",
+      error
+    );
+
     res.status(500).json({
       success: false,
       message: error.message,
