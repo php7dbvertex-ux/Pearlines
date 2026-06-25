@@ -84,37 +84,52 @@ const getUnreadCount = async (
     });
   }
 };
-
-const markNotificationRead = async (req, res) => {
+const markNotificationRead = async (
+  req,
+  res
+) => {
   try {
     const userId = req.user.id;
 
-    // Mark all custom notifications as read
+    // Mark custom notifications read
     await CustomNotification.updateMany(
-      { userId, isRead: false },
-      { $set: { isRead: true } }
+      { userId },
+      {
+        $set: {
+          isRead: true,
+        },
+      }
     );
 
-    // Mark all global notifications as read
-    const globalNotifications =
+    // Get all global notifications
+    const notifications =
       await Notification.find({}, "_id");
 
-    const readRecords =
-      globalNotifications.map((n) => ({
-        userId,
-        notificationId: n._id,
-      }));
-
-    if (readRecords.length > 0) {
-      await NotificationRead.insertMany(
-        readRecords,
-        { ordered: false }
-      ).catch(() => {});
+    // Insert only if not already read
+    for (const notification of notifications) {
+      await NotificationRead.updateOne(
+        {
+          userId,
+          notificationId:
+            notification._id,
+        },
+        {
+          $setOnInsert: {
+            userId,
+            notificationId:
+              notification._id,
+          },
+        },
+        {
+          upsert: true,
+        }
+      );
     }
 
     res.status(200).json({
       success: true,
-      message: "All notifications marked as read",
+      message:
+        "All notifications marked as read",
     });
   } catch (error) {
     res.status(500).json({
@@ -123,7 +138,6 @@ const markNotificationRead = async (req, res) => {
     });
   }
 };
-
 
   
 const markAsRead = async (
