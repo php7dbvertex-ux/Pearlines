@@ -1,4 +1,4 @@
-import admin from "../config/firebaseAdmin.js";
+import { messaging } from "../config/firebaseAdmin.js";
 import User from "../models/user.model.js";
 
 const sendPushNotification = async ({
@@ -11,7 +11,7 @@ const sendPushNotification = async ({
   if (!token) return;
 
   try {
-    await admin.messaging().send({
+    await messaging.send({
       token,
 
       notification: {
@@ -38,27 +38,30 @@ const sendPushNotification = async ({
         },
       },
 
-      data: Object.keys(data).reduce((acc, key) => {
-        acc[key] = String(data[key]);
-        return acc;
-      }, {}),
+      data: Object.fromEntries(
+        Object.entries(data).map(([key, value]) => [
+          key,
+          String(value),
+        ])
+      ),
     });
 
     console.log("✅ Push notification sent");
   } catch (error) {
     console.error("Firebase Error:", error.code);
 
-    // Remove invalid token from database
     if (
       error.code === "messaging/registration-token-not-registered" ||
       error.code === "messaging/invalid-registration-token"
     ) {
-      console.log("Removing invalid FCM Token");
+      console.log("Removing invalid FCM Token...");
 
-      await User.findOneAndUpdate(
+      await User.updateOne(
         { fcmToken: token },
         {
-          fcmToken: null,
+          $set: {
+            fcmToken: null,
+          },
         }
       );
     }
