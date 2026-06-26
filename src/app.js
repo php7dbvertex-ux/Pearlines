@@ -55,6 +55,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://pearlines-frontend-admin-tdhr.onrender.com",
+       "https://h3gfjxf9-5173.inc1.devtunnels.ms",
     ],
 
     credentials: true,
