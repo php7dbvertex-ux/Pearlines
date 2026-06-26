@@ -29,6 +29,10 @@ const paymentSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    paymentRequestId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PaymentRequest",
+    },
 
     signature: {
       type: String,

@@ -1,4 +1,4 @@
-import User from "../models/user.model.js"
+import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 
 const createUser = async (userData) => {
@@ -25,19 +25,11 @@ const getUserById = async (id) => {
   return await User.findById(id);
 };
 
-
-const getMyProfile = async (
-  userId
-) => {
-  return await User.findById(
-    userId
-  ).select("-password");
+const getMyProfile = async (userId) => {
+  return await User.findById(userId).select("-password");
 };
 
-const updateProfile = async (
-  userId,
-  data
-) => {
+const updateProfile = async (userId, data) => {
   return await User.findByIdAndUpdate(
     userId,
     {
@@ -47,83 +39,68 @@ const updateProfile = async (
     },
     {
       new: true,
-    }
+    },
   ).select("-password");
 };
 
-const updateProfilePhoto =
-  async (
+const updateProfilePhoto = async (userId, imageUrl, publicId) => {
+  return await User.findByIdAndUpdate(
     userId,
-    imageUrl,
-    publicId
-  ) => {
-    return await User.findByIdAndUpdate(
-      userId,
-      {
-        profileImage:
-          imageUrl,
+    {
+      profileImage: imageUrl,
 
-        profileImagePublicId:
-          publicId,
-      },
-      {
-        new: true,
-      }
-    ).select("-password");
-  };
+      profileImagePublicId: publicId,
+    },
+    {
+      new: true,
+    },
+  ).select("-password");
+};
 
-const deleteProfilePhoto =
-  async (userId) => {
-    return await User.findByIdAndUpdate(
-      userId,
-      {
-        profileImage: "",
-        profileImagePublicId:
-          "",
-      },
-      {
-        new: true,
-      }
-    );
-  };
-
-const changePassword =
-  async (
+const deleteProfilePhoto = async (userId) => {
+  return await User.findByIdAndUpdate(
     userId,
-    oldPassword,
-    newPassword
-  ) => {
-    const user =
-      await User.findById(userId);
+    {
+      profileImage: "",
+      profileImagePublicId: "",
+    },
+    {
+      new: true,
+    },
+  );
+};
 
-    if (!user) {
-      throw new Error(
-        "User not found"
-      );
-    }
+const changePassword = async (userId, oldPassword, newPassword) => {
+  const user = await User.findById(userId);
 
-    const isMatch =
-      await bcrypt.compare(
-        oldPassword,
-        user.password
-      );
+  if (!user) {
+    throw new Error("User not found");
+  }
 
-    if (!isMatch) {
-      throw new Error(
-        "Old password is incorrect"
-      );
-    }
+  const isMatch = await bcrypt.compare(oldPassword, user.password);
 
-    user.password =
-      await bcrypt.hash(
-        newPassword,
-        10
-      );
+  if (!isMatch) {
+    throw new Error("Old password is incorrect");
+  }
 
-    await user.save();
+  user.password = await bcrypt.hash(newPassword, 10);
 
-    return true;
-  };
+  await user.save();
+
+  return true;
+};
+
+const updateFcmToken = async (userId, fcmToken) => {
+  return await User.findByIdAndUpdate(
+    userId,
+    {
+      fcmToken,
+    },
+    {
+      new: true,
+    },
+  );
+};
 
 export default {
   createUser,
@@ -134,5 +111,6 @@ export default {
   updateProfile,
   updateProfilePhoto,
   deleteProfilePhoto,
-  changePassword
+  changePassword,
+  updateFcmToken,
 };

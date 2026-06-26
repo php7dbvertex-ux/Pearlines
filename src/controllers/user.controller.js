@@ -1,6 +1,7 @@
 import userService from "../services/user.service.js";
 import uploadService from "../services/upload.service.js";
 
+
 const createUser = async (req, res) => {
   try {
     const user = await userService.createUser(req.body);
@@ -58,12 +59,9 @@ const deleteUser = async (req, res) => {
   }
 };
 
-
 const getUserById = async (req, res) => {
   try {
-    const user = await userService.getUserById(
-      req.params.id
-    );
+    const user = await userService.getUserById(req.params.id);
 
     if (!user) {
       return res.status(404).json({
@@ -84,16 +82,9 @@ const getUserById = async (req, res) => {
   }
 };
 
-
-const getMyProfile = async (
-  req,
-  res
-) => {
+const getMyProfile = async (req, res) => {
   try {
-    const user =
-      await userService.getMyProfile(
-        req.user.id
-      );
+    const user = await userService.getMyProfile(req.user.id);
 
     res.status(200).json({
       success: true,
@@ -107,22 +98,13 @@ const getMyProfile = async (
   }
 };
 
-
-const updateProfile = async (
-  req,
-  res
-) => {
+const updateProfile = async (req, res) => {
   try {
-    const user =
-      await userService.updateProfile(
-        req.user.id,
-        req.body
-      );
+    const user = await userService.updateProfile(req.user.id, req.body);
 
     res.status(200).json({
       success: true,
-      message:
-        "Profile updated successfully",
+      message: "Profile updated successfully",
       data: user,
     });
   } catch (error) {
@@ -133,92 +115,86 @@ const updateProfile = async (
   }
 };
 
+const updateProfilePhoto = async (req, res) => {
+  try {
+    const result = await uploadService.uploadImage(req.file.path, "profile");
 
-const updateProfilePhoto =
-  async (req, res) => {
-    try {
-      const result =
-        await uploadService.uploadImage(
-          req.file.path,
-          "profile"
-        );
+    const user = await userService.updateProfilePhoto(
+      req.user.id,
+      result.imageUrl,
+    );
 
-      const user =
-        await userService.updateProfilePhoto(
-          req.user.id,
-          result.imageUrl
-        );
+    res.status(200).json({
+      success: true,
+      message: "Profile photo updated",
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
-      res.status(200).json({
-        success: true,
-        message:
-          "Profile photo updated",
-        data: user,
-      });
-    } catch (error) {
-      res.status(500).json({
+const deleteProfilePhoto = async (req, res) => {
+  try {
+    await userService.deleteProfilePhoto(req.user.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Profile photo deleted",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    await userService.changePassword(req.user.id, oldPassword, newPassword);
+
+    res.status(200).json({
+      success: true,
+      message: "Password changed successfully",
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const updateFcmToken = async (req, res) => {
+  try {
+    const { fcmToken } = req.body;
+
+    if (!fcmToken) {
+      return res.status(400).json({
         success: false,
-        message:
-          error.message,
+        message: "FCM Token is required",
       });
     }
-  };
 
+    await userService.updateFcmToken(req.user.id, fcmToken);
 
-  const deleteProfilePhoto =
-  async (req, res) => {
-    try {
-      await userService.deleteProfilePhoto(
-        req.user.id
-      );
-
-      res.status(200).json({
-        success: true,
-        message:
-          "Profile photo deleted",
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message:
-          error.message,
-      });
-    }
-  };
-
-
-
-  const changePassword =
-  async (req, res) => {
-    try {
-      const {
-        oldPassword,
-        newPassword,
-      } = req.body;
-
-      await userService.changePassword(
-        req.user.id,
-        oldPassword,
-        newPassword
-      );
-
-      res.status(200).json({
-        success: true,
-        message:
-          "Password changed successfully",
-      });
-    } catch (error) {
-      res.status(400).json({
-        success: false,
-        message:
-          error.message,
-      });
-    }
-  };
-
-
-
-
+    res.status(200).json({
+      success: true,
+      message: "FCM token updated successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 export default {
   createUser,
@@ -229,5 +205,6 @@ export default {
   updateProfile,
   updateProfilePhoto,
   deleteProfilePhoto,
-  changePassword
+  changePassword,
+  updateFcmToken,
 };

@@ -45,38 +45,36 @@ const getUnreadCount = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const unreadCustom = await CustomNotification.countDocuments({
-      userId,
-      isRead: false,
-    });
+    const unreadCustom =
+      await CustomNotification.countDocuments({
+        userId,
+        isRead: false,
+      });
 
-    const totalGlobal = await Notification.countDocuments();
+    const notifications =
+      await Notification.find({}, "_id");
 
-    const notifications = await Notification.find({}, "_id");
+    const notificationIds =
+      notifications.map((n) => n._id);
 
-    const notificationIds = notifications.map((n) => n._id);
+    const totalGlobal =
+      notificationIds.length;
 
-    const readGlobal = await NotificationRead.countDocuments({
-      userId,
-      notificationId: {
-        $in: notificationIds,
-      },
-    });
-    console.log("========== UNREAD COUNT DEBUG ==========");
-    console.log("User ID:", userId);
-    console.log("Unread Custom:", unreadCustom);
-    console.log("Total Global Notifications:", totalGlobal);
-    console.log("Read Global Notifications:", readGlobal);
+    const readGlobal =
+      await NotificationRead.countDocuments({
+        userId,
+        notificationId: {
+          $in: notificationIds,
+        },
+      });
 
-    const unreadGlobal = Math.max(0, totalGlobal - readGlobal);
-
-    console.log("Unread Global:", unreadGlobal);
-    console.log("Final Unread Count:", unreadCustom + unreadGlobal);
-    console.log("========================================");
+    const unreadGlobal =
+      totalGlobal - readGlobal;
 
     res.status(200).json({
       success: true,
-      unreadCount: unreadCustom + unreadGlobal,
+      unreadCount:
+        unreadCustom + unreadGlobal,
       debug: {
         unreadCustom,
         totalGlobal,
@@ -85,8 +83,6 @@ const getUnreadCount = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Unread Count Error:", error);
-
     res.status(500).json({
       success: false,
       message: error.message,
@@ -163,9 +159,42 @@ const markAsRead = async (req, res) => {
   }
 };
 
+
+const cleanNotificationReads = async (
+  req,
+  res
+) => {
+  try {
+    const notifications =
+      await Notification.find({}, "_id");
+
+    const ids = notifications.map(
+      (n) => n._id
+    );
+
+    const result =
+      await NotificationRead.deleteMany({
+        notificationId: {
+          $nin: ids,
+        },
+      });
+
+    res.json({
+      success: true,
+      deleted: result.deletedCount,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export default {
   getUnreadCount,
   markNotificationRead,
   getUserNotifications,
+  cleanNotificationReads,
   markAsRead,
 };

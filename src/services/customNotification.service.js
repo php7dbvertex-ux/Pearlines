@@ -1,5 +1,7 @@
 import CustomNotification from "../models/customNotification.model.js";
 import User from "../models/user.model.js";
+import firebaseService from "../services/firebase.service.js";
+
 
 const createCustomNotification = async (data) => {
   const {
@@ -20,6 +22,7 @@ const createCustomNotification = async (data) => {
     throw new Error("User not found");
   }
 
+  // Save notification
   const notification =
     await CustomNotification.create({
       userId,
@@ -28,6 +31,35 @@ const createCustomNotification = async (data) => {
       imageUrl,
       publicId,
     });
+
+  // Send Firebase Push
+  try {
+    if (user.fcmToken) {
+      await firebaseService.sendPushNotification({
+        token: user.fcmToken,
+        title,
+        body: message,
+        imageUrl: imageUrl || "",
+        data: {
+          type: "custom_notification",
+          notificationId: notification._id.toString(),
+        },
+      });
+
+      console.log(
+        `✅ Custom push sent to ${user.name}`
+      );
+    } else {
+      console.log(
+        `⚠ User ${user.name} has no FCM token`
+      );
+    }
+  } catch (error) {
+    console.error(
+      "Firebase Push Error:",
+      error.message
+    );
+  }
 
   return notification;
 };

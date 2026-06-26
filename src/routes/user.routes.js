@@ -5,36 +5,26 @@ import upload from "../middlewares/upload.middleware.js";
 
 const router = express.Router();
 
-router.get(
-  "/me",
-  authMiddleware,
-  userController.getMyProfile
-);
+router.get("/me", authMiddleware, userController.getMyProfile);
 
-router.put(
-  "/profile",
-  authMiddleware,
-  userController.updateProfile
-);
+
+router.put("/profile", authMiddleware, userController.updateProfile);
 
 router.put(
   "/profile-photo",
   authMiddleware,
   upload.single("image"),
-  userController.updateProfilePhoto
+  userController.updateProfilePhoto,
 );
-
 router.delete(
   "/profile-photo",
   authMiddleware,
-  userController.deleteProfilePhoto
+  userController.deleteProfilePhoto,
 );
+router.put("/change-password", authMiddleware, userController.changePassword);
+router.post("/fcm-token", authMiddleware, userController.updateFcmToken);
 
-router.put(
-  "/change-password",
-  authMiddleware,
-  userController.changePassword
-);
+
 router.post("/", userController.createUser);
 router.get("/", authMiddleware, userController.getAllUsers);
 router.delete("/:id", authMiddleware, userController.deleteUser);

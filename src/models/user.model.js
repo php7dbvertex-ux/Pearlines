@@ -2,8 +2,7 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-
-     name: {
+    name: {
       type: String,
       required: true,
       trim: true,
@@ -22,15 +21,20 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
-profileImage: {
-  type: String,
-  default: "",
-},
+    fcmToken: {
+      type: String,
+      default: "",
+    },
+    profileImage: {
+      type: String,
+      default: "",
+    },
 
-profileImagePublicId: {
-  type: String,
-  default: "",
-}, dob: {
+    profileImagePublicId: {
+      type: String,
+      default: "",
+    },
+    dob: {
       type: Date,
       required: true,
     },
@@ -49,7 +53,7 @@ profileImagePublicId: {
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
 
 export default mongoose.model("User", userSchema);

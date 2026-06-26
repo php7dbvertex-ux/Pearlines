@@ -45,6 +45,7 @@ import userNotificationRoutes from "./routes/userNotification.route.js";
 
 import paymentConfigRoutes from "./routes/paymentConfig.route.js";
 
+import paymentRequestRoutes from "./routes/paymentRequest.route.js";
 import cors from "cors";
 const app = express();
 
@@ -85,6 +86,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/user-notifications", userNotificationRoutes);
 app.use("/api/payment-config", paymentConfigRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/payment-request", paymentRequestRoutes);
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,

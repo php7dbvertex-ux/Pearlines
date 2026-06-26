@@ -35,6 +35,10 @@ router.get(
   userNotificationController.getUnreadCount
 );
 
+router.get(
+  "/clean",
+  userNotificationController.cleanNotificationReads
+);
 
 
 export default router;
