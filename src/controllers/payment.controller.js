@@ -240,3 +240,52 @@ export const getMyPayments =
       });
     }
   };
+
+
+
+  // CREATE ORDER WITH CUSTOM AMOUNT
+export const createCustomAmountOrder = async (
+  req,
+  res
+) => {
+  try {
+    const { amount } = req.body;
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Valid amount is required",
+      });
+    }
+
+    const options = {
+      amount: Number(amount) * 100,
+      currency: "INR",
+      receipt: `receipt_${Date.now()}`,
+    };
+
+    const order =
+      await razorpay.orders.create(options);
+
+    await Payment.create({
+      userId: req.user.id,
+      amount: Number(amount),
+      orderId: order.id,
+      title: "Custom Payment",
+      description: "User initiated payment",
+      status: "pending",
+    });
+
+    return res.status(200).json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

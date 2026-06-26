@@ -2,6 +2,7 @@ import express from "express";
 
 import {
   createOrder,
+  createCustomAmountOrder,
   verifyPayment,
   getAllPayments,
   getMyPayments,
@@ -12,28 +13,14 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.post(
-  "/create-order",
-  authMiddleware,
-  createOrder
-);
+router.post("/create-order", authMiddleware, createOrder);
 
-router.post(
-  "/verify",
-  authMiddleware,
-  verifyPayment
-);
+router.post("/create-custom-order", authMiddleware, createCustomAmountOrder);
 
-router.get(
-  "/my-payments",
-  authMiddleware,
-  getMyPayments
-);
+router.post("/verify", authMiddleware, verifyPayment);
 
-router.get(
-  "/all",
-  adminAuth,
-  getAllPayments
-);
+router.get("/my-payments", authMiddleware, getMyPayments);
+
+router.get("/all", adminAuth, getAllPayments);
 
 export default router;
