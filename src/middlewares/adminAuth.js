@@ -5,6 +5,14 @@ const adminAuth = (
   res,
   next
 ) => {
+    console.log("========= ADMIN AUTH =========");
+  console.log(req.method);
+  console.log(req.originalUrl);
+
+  console.log("Authorization:");
+  console.log(req.headers.authorization);
+
+  console.log("==============================");
   try {
     const token =
       req.headers.authorization?.split(

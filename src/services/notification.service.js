@@ -4,6 +4,9 @@ import User from "../models/user.model.js";
 import firebaseService from "../services/firebase.service.js";
 // Create Notification
 
+
+
+
 const createNotification = async (notificationData) => {
   // Save notification in MongoDB
   const notification = await Notification.create(notificationData);
@@ -96,4 +99,5 @@ export default {
   getAllNotifications,
   getNotificationById,
   deleteNotification,
+
 };

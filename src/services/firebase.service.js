@@ -8,53 +8,107 @@ const sendPushNotification = async ({
   imageUrl = "",
   data = {},
 }) => {
-  if (!token) return;
+  // =========================
+  // Validate Token
+  // =========================
+
+  if (!token) {
+    console.log("❌ No FCM Token Found");
+    return;
+  }
+
+  console.log("\n======================================");
+  console.log("🚀 sendPushNotification() CALLED");
+  console.log("======================================");
+  console.log("Token:");
+  console.log(token);
+
+  console.log("Title:");
+  console.log(title);
+
+  console.log("Body:");
+  console.log(body);
+
+  // =========================
+  // Create FCM Message
+  // =========================
+const message = {
+  token,
+
+  notification: {
+    title,
+    body,
+  },
+
+  android: {
+    priority: "high",
+    notification: {
+      channelId: "high_importance_channel",
+      ...(imageUrl ? { imageUrl } : {}),
+    },
+  },
+
+  apns: {
+    payload: {
+      aps: {
+        sound: "default",
+      },
+    },
+    ...(imageUrl
+      ? {
+          fcmOptions: {
+            imageUrl,
+          },
+        }
+      : {}),
+  },
+
+  data: Object.fromEntries(
+    Object.entries(data).map(([k, v]) => [
+      k,
+      String(v),
+    ])
+  ),
+};
+  console.log("\n📦 FCM Payload:");
+  console.log(JSON.stringify(message, null, 2));
+
+  // =========================
+  // Send Notification
+  // =========================
 
   try {
-    await messaging.send({
-      token,
+    console.log("\n📤 Sending notification to Firebase...");
 
-      notification: {
-        title,
-        body,
-      },
+    const response = await messaging.send(message);
 
-      android: {
-        priority: "high",
-        notification: {
-          channelId: "high_importance_channel",
-          imageUrl,
-        },
-      },
+    console.log("\n✅ Firebase accepted the notification");
+    console.log("Response:");
+    console.log(response);
 
-      apns: {
-        payload: {
-          aps: {
-            sound: "default",
-          },
-        },
-        fcmOptions: {
-          imageUrl,
-        },
-      },
+    console.log("======================================\n");
 
-      data: Object.fromEntries(
-        Object.entries(data).map(([key, value]) => [
-          key,
-          String(value),
-        ])
-      ),
-    });
-
-    console.log("✅ Push notification sent");
+    return response;
   } catch (error) {
-    console.error("Firebase Error:", error.code);
+    console.log("\n❌ Firebase Error");
+    console.log("--------------------------------------");
+    console.log("Code:");
+    console.log(error.code);
 
+    console.log("\nMessage:");
+    console.log(error.message);
+
+    console.log("\nComplete Error:");
+    console.log(error);
+
+    console.log("======================================\n");
+
+    // Remove invalid token from DB
     if (
       error.code === "messaging/registration-token-not-registered" ||
       error.code === "messaging/invalid-registration-token"
     ) {
-      console.log("Removing invalid FCM Token...");
+      console.log("🗑 Removing invalid FCM token from database...");
 
       await User.updateOne(
         { fcmToken: token },
@@ -64,7 +118,11 @@ const sendPushNotification = async ({
           },
         }
       );
+
+      console.log("✅ Invalid token removed");
     }
+
+    return null;
   }
 };
 

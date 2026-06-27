@@ -1,10 +1,17 @@
 import notificationService from "../services/notification.service.js";
+import User from "../models/user.model.js";
+import firebaseService from "../services/firebase.service.js";
 
 // Create Notification
-
 const createNotification = async (req, res) => {
+  console.log("=================================");
+  console.log("✅ Notification Controller Called");
+  console.log(req.body);
+  console.log("=================================");
+
   try {
-    const notification = await notificationService.createNotification(req.body);
+    const notification =
+      await notificationService.createNotification(req.body);
 
     res.status(201).json({
       success: true,
@@ -12,13 +19,14 @@ const createNotification = async (req, res) => {
       data: notification,
     });
   } catch (error) {
+    console.error(error);
+
     res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
-
 // Get All Notifications
 
 const getAllNotifications = async (req, res) => {
