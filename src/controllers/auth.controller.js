@@ -187,7 +187,7 @@ export const forgotPasswordEmail = async (req, res) => {
       "Password Reset OTP",
       `
       <h2>Your OTP is ${otp}</h2>
-      `
+      `,
     );
 
     console.log("sendEmail completed.");
@@ -272,13 +272,14 @@ export const verifyEmailOtp = async (req, res) => {
 // Reset Password
 export const resetPassword = async (req, res) => {
   try {
-    const { email, newPassword, confirmPassword } = req.body;
+    const { mobileNo, newPassword, confirmPassword } = req.body;
 
     // Validation
-    if (!email || !newPassword || !confirmPassword) {
+    if (!mobileNo || !newPassword || !confirmPassword) {
       return res.status(400).json({
         success: false,
-        message: "Email, new password and confirm password are required",
+        message:
+          "Mobile number, new password and confirm password are required",
       });
     }
 
@@ -289,7 +290,8 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
+    // Find user by mobile number
+    const user = await User.findOne({ mobileNo });
 
     if (!user) {
       return res.status(404).json({
@@ -308,6 +310,7 @@ export const resetPassword = async (req, res) => {
         message: "Please verify OTP first",
       });
     }
+
     // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
@@ -327,7 +330,7 @@ export const resetPassword = async (req, res) => {
       message: "Password reset successfully",
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
 
     return res.status(500).json({
       success: false,
