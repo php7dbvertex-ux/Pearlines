@@ -14,6 +14,26 @@ const createDoctor = async (req, res) => {
       data: doctor,
     });
   } catch (error) {
+    // MongoDB Duplicate Key Error
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+
+      let message = "Duplicate value";
+
+      if (field === "email") {
+        message = "Email already exists";
+      }
+
+      if (field === "mobileNo") {
+        message = "Mobile number already exists";
+      }
+
+      return res.status(400).json({
+        success: false,
+        message,
+      });
+    }
+
     res.status(500).json({
       success: false,
       message: error.message,
