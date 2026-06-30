@@ -32,17 +32,15 @@ const sendEmail = async (to, subject, html) => {
     console.log(response.data);
 
     return response.data;
-  } catch (error) {
-    console.log("❌ Brevo Error");
+} catch (error) {
+  console.log("========== BREVO ERROR ==========");
 
-    if (error.response) {
-      console.log(error.response.data);
-    } else {
-      console.log(error.message);
-    }
+  console.log("Status:", error.response?.status);
+  console.log("Data:", error.response?.data);
+  console.log("Message:", error.message);
 
-    throw error;
-  }
+  throw error;
+}
 };
 
 export default sendEmail;
