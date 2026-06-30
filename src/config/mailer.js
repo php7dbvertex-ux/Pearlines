@@ -1,4 +1,7 @@
+import dns from "dns";
 import nodemailer from "nodemailer";
+
+dns.setDefaultResultOrder("ipv4first");
 
 console.log("========== MAIL CONFIG ==========");
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
@@ -20,19 +23,15 @@ const transporter = nodemailer.createTransport({
   connectionTimeout: 10000,
   greetingTimeout: 10000,
   socketTimeout: 10000,
-
-  tls: {
-    rejectUnauthorized: false,
-  },
 });
 
 (async () => {
   try {
     await transporter.verify();
     console.log("✅ Mailer Ready");
-  } catch (error) {
+  } catch (err) {
     console.error("❌ Mailer Verify Error");
-    console.error(error);
+    console.error(err);
   }
 })();
 
