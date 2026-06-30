@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import sendEmail from "../utils/sendEmail.js";
 import { generateOTP } from "../utils/otpGenerator.js";
+import twilioClient from "../config/twilio.js";
 
 // Signup
 export const signup = async (req, res) => {
@@ -207,14 +208,17 @@ export const forgotPasswordEmail = async (req, res) => {
       success: true,
       message: "OTP sent successfully to your registered email.",
     });
-  } catch (error) {
-    console.log(error);
+  }catch (error) {
+  console.error("Forgot Password Email Error:");
+  console.error(error);
+  console.error(error.response);
 
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
+  return res.status(500).json({
+    success: false,
+    message: error.message,
+    stack: error.stack,
+  });
+}
 };
 
 // Verify Email OTP
@@ -279,8 +283,6 @@ export const verifyEmailOtp = async (req, res) => {
   }
 };
 
-
-
 // Reset Password
 export const resetPassword = async (req, res) => {
   try {
@@ -311,13 +313,15 @@ export const resetPassword = async (req, res) => {
     }
 
     // Check OTP verification
-    if (!user.emailOtpVerified) {
+    if (
+      !user.emailOtpVerified ||
+      !["email", "mobile"].includes(user.passwordResetMethod)
+    ) {
       return res.status(400).json({
         success: false,
         message: "Please verify OTP first",
       });
     }
-
     // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
@@ -336,7 +340,106 @@ export const resetPassword = async (req, res) => {
       success: true,
       message: "Password reset successfully",
     });
+  } catch (error) {
+    console.log(error);
 
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Forgot Password - Mobile OTP
+export const forgotPasswordMobile = async (req, res) => {
+  try {
+    const { mobileNo } = req.body;
+
+    if (!mobileNo) {
+      return res.status(400).json({
+        success: false,
+        message: "Mobile number is required",
+      });
+    }
+
+    const user = await User.findOne({ mobileNo });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Mobile number not registered",
+      });
+    }
+
+    await twilioClient.verify.v2
+      .services(process.env.TWILIO_VERIFY_SERVICE_SID)
+      .verifications.create({
+        to: `+91${mobileNo}`,
+        channel: "sms",
+      });
+
+    user.passwordResetMethod = "mobile";
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully to your mobile number.",
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Verify Mobile OTP
+export const verifyMobileOtp = async (req, res) => {
+  try {
+    const { mobileNo, otp } = req.body;
+
+    if (!mobileNo || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Mobile number and OTP are required",
+      });
+    }
+
+    const user = await User.findOne({ mobileNo });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "Mobile number not registered",
+      });
+    }
+
+    const verificationCheck = await twilioClient.verify.v2
+      .services(process.env.TWILIO_VERIFY_SERVICE_SID)
+      .verificationChecks.create({
+        to: `+91${mobileNo}`,
+        code: otp,
+      });
+
+    if (verificationCheck.status !== "approved") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP",
+      });
+    }
+
+    // Allow password reset
+    user.emailOtpVerified = true;
+    user.passwordResetMethod = "mobile";
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Mobile OTP verified successfully.",
+    });
   } catch (error) {
     console.log(error);
 
