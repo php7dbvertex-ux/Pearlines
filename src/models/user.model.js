@@ -14,7 +14,26 @@ const userSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
+    emailOtp: {
+      type: String,
+      default: null,
+    },
 
+    emailOtpExpiry: {
+      type: Date,
+      default: null,
+    },
+
+    emailOtpVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    passwordResetMethod: {
+      type: String,
+      enum: ["email", "mobile", null],
+      default: null,
+    },
     mobileNo: {
       type: String,
       required: true,
