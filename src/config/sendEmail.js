@@ -12,15 +12,12 @@ const sendEmail = async (to, subject, html) => {
           name: process.env.EMAIL_FROM_NAME,
           email: process.env.EMAIL_FROM,
         },
-
         to: [
           {
             email: to,
           },
         ],
-
         subject,
-
         htmlContent: html,
       },
       {
@@ -31,17 +28,17 @@ const sendEmail = async (to, subject, html) => {
       }
     );
 
-    console.log("✅ Email Sent Successfully");
+    console.log("✅ Email Sent");
     console.log(response.data);
 
     return response.data;
   } catch (error) {
-    console.error("❌ Brevo API Error");
+    console.log("❌ Brevo Error");
 
     if (error.response) {
-      console.error(error.response.data);
+      console.log(error.response.data);
     } else {
-      console.error(error.message);
+      console.log(error.message);
     }
 
     throw error;
