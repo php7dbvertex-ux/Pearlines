@@ -1,20 +1,39 @@
 import nodemailer from "nodemailer";
 
+console.log("========== MAIL CONFIG ==========");
+console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log(
+  "EMAIL_PASS:",
+  process.env.EMAIL_PASS ? "Loaded ✅" : "Missing ❌"
+);
+
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-});
-console.log("EMAIL_USER:", process.env.EMAIL_USER);
-console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Loaded" : "Missing");
 
-transporter.verify((error, success) => {
-  if (error) {
-    console.log("Mailer Error:", error);
-  } else {
-    console.log("Mailer Ready");
-  }
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
+
+  tls: {
+    rejectUnauthorized: false,
+  },
 });
+
+(async () => {
+  try {
+    await transporter.verify();
+    console.log("✅ Mailer Ready");
+  } catch (error) {
+    console.error("❌ Mailer Verify Error");
+    console.error(error);
+  }
+})();
+
 export default transporter;
