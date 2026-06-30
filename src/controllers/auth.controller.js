@@ -144,7 +144,10 @@ export const login = async (req, res) => {
 // Forgot Password - Email OTP
 export const forgotPasswordEmail = async (req, res) => {
   try {
+    console.log("========== FORGOT PASSWORD EMAIL ==========");
+
     const { email } = req.body;
+    console.log("Request Email:", email);
 
     if (!email) {
       return res.status(400).json({
@@ -155,6 +158,8 @@ export const forgotPasswordEmail = async (req, res) => {
 
     const user = await User.findOne({ email });
 
+    console.log("User:", user);
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -162,63 +167,44 @@ export const forgotPasswordEmail = async (req, res) => {
       });
     }
 
-    // Generate OTP
     const otp = generateOTP();
+    console.log("Generated OTP:", otp);
 
-    // Hash OTP
     const hashedOtp = await bcrypt.hash(otp, 10);
 
-    // Save OTP
     user.emailOtp = hashedOtp;
-    user.emailOtpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    user.emailOtpExpiry = new Date(Date.now() + 5 * 60 * 1000);
     user.emailOtpVerified = false;
     user.passwordResetMethod = "email";
 
+    console.log("Saving user...");
     await user.save();
+    console.log("User saved successfully.");
 
-    // Send Email
+    console.log("Calling sendEmail...");
     await sendEmail(
       user.email,
       "Password Reset OTP",
       `
-      <div style="font-family:Arial,sans-serif;padding:20px">
-          <h2>Password Reset Request</h2>
-
-          <p>Hello <b>${user.name}</b>,</p>
-
-          <p>Your OTP for resetting your password is</p>
-
-          <h1 style="letter-spacing:5px;color:#2563eb;">
-            ${otp}
-          </h1>
-
-          <p>This OTP is valid for <b>5 minutes</b>.</p>
-
-          <p>Please do not share this OTP with anyone.</p>
-
-          <br>
-
-          <p>Thanks,</p>
-          <p><b>Dental Clinic Team</b></p>
-      </div>
-      `,
+      <h2>Your OTP is ${otp}</h2>
+      `
     );
+
+    console.log("sendEmail completed.");
 
     return res.status(200).json({
       success: true,
-      message: "OTP sent successfully to your registered email.",
+      message: "OTP sent successfully.",
     });
-  }catch (error) {
-  console.error("Forgot Password Email Error:");
-  console.error(error);
-  console.error(error.response);
+  } catch (error) {
+    console.error("Forgot Password Email Error");
+    console.error(error);
 
-  return res.status(500).json({
-    success: false,
-    message: error.message,
-    stack: error.stack,
-  });
-}
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };
 
 // Verify Email OTP
