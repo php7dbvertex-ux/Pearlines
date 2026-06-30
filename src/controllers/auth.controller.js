@@ -272,14 +272,14 @@ export const verifyEmailOtp = async (req, res) => {
 // Reset Password
 export const resetPassword = async (req, res) => {
   try {
-    const { mobileNo, newPassword, confirmPassword } = req.body;
+    const { email, mobileNo, newPassword, confirmPassword } = req.body;
 
     // Validation
-    if (!mobileNo || !newPassword || !confirmPassword) {
+    if ((!email && !mobileNo) || !newPassword || !confirmPassword) {
       return res.status(400).json({
         success: false,
         message:
-          "Mobile number, new password and confirm password are required",
+          "Email or mobile number, new password and confirm password are required",
       });
     }
 
@@ -290,8 +290,10 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    // Find user by mobile number
-    const user = await User.findOne({ mobileNo });
+    // Find user
+    const user = email
+      ? await User.findOne({ email })
+      : await User.findOne({ mobileNo });
 
     if (!user) {
       return res.status(404).json({
@@ -300,7 +302,7 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    // Check OTP verification
+    // OTP must already be verified
     if (
       !user.emailOtpVerified ||
       !["email", "mobile"].includes(user.passwordResetMethod)
@@ -311,11 +313,8 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
     // Update password
-    user.password = hashedPassword;
+    user.password = await bcrypt.hash(newPassword, 10);
 
     // Clear OTP data
     user.emailOtp = null;
