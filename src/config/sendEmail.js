@@ -1,21 +1,49 @@
-import transporter from "../config/mailer.js";
+import axios from "axios";
 
 const sendEmail = async (to, subject, html) => {
   try {
-    const info = await transporter.sendMail({
-      from: `"Dental Clinic" <${process.env.EMAIL_FROM}>`,
-      to,
-      subject,
-      html,
-    });
+    console.log("========== SENDING EMAIL ==========");
+    console.log("To:", to);
 
-    console.log("✅ Email Sent");
-    console.log(info.messageId);
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: {
+          name: process.env.EMAIL_FROM_NAME,
+          email: process.env.EMAIL_FROM,
+        },
 
-    return info;
+        to: [
+          {
+            email: to,
+          },
+        ],
+
+        subject,
+
+        htmlContent: html,
+      },
+      {
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("✅ Email Sent Successfully");
+    console.log(response.data);
+
+    return response.data;
   } catch (error) {
-    console.error("❌ Email Send Error");
-    console.error(error);
+    console.error("❌ Brevo API Error");
+
+    if (error.response) {
+      console.error(error.response.data);
+    } else {
+      console.error(error.message);
+    }
+
     throw error;
   }
 };
